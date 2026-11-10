@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Complaint Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            color: #163a70;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 7px;
+            background: #163a70;
+            color: white;
+            text-decoration: none;
+        }
+
+        .table-card {
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eef3fa;
+            color: #163a70;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .reference {
+            font-weight: bold;
+            color: #163a70;
+        }
+
+        select {
+            padding: 9px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: white;
+        }
+
+        button {
+            margin-top: 8px;
+            padding: 9px 12px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .empty {
+            padding: 30px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .notice {
+            margin-bottom: 18px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background: #fff7ed;
+            color: #9a3412;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Admin Complaint Dashboard</h1>
+                <p class="subtitle">
+                    View complaints and manage their recorded status.
+                </p>
+            </div>
+
+            <div>
+                <a class="back-link" href="{{ url_for('admin_customers') }}">
+                    Customer Management
+                </a>
+                <a class="back-link" href="{{ url_for('home') }}">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="notice">
+            These are complaints recorded in the project's local database.
+            Updating a status does not contact a real bank.
+        </div>
+
+        <div class="table-card">
+            {% if complaints %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Customer</th>
+                            <th>Category</th>
+                            <th>Complaint Details</th>
+                            <th>Submitted</th>
+                            <th>Status Management</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for complaint in complaints %}
+                            <tr>
+                                <td class="reference">
+                                    CMP-{{ "%06d"|format(complaint["id"]) }}
+                                </td>
+
+                                <td>
+                                    {{ complaint["full_name"] }}<br>
+                                    {{ complaint["email"] }}
+                                </td>
+
+                                <td>{{ complaint["category"] }}</td>
+
+                                <td>{{ complaint["query"] }}</td>
+
+                                <td>{{ complaint["created_at"] }}</td>
+
+                                <td>
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                            'update_complaint_status',
+                                            complaint_id=complaint['id']
+                                        ) }}"
+                                    >
+                                        <select name="status" required>
+                                            {% for status in statuses %}
+                                                <option
+                                                    value="{{ status }}"
+                                                    {% if status == complaint["status"] %}
+                                                        selected
+                                                    {% endif %}
+                                                >
+                                                    {{ status }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <br>
+
+                                        <button type="submit">
+                                            Update Status
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty">
+                    No complaints have been registered yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

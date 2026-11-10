@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Credit Card Eligibility Checker</title>
+        <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            color: #172033;
+            margin: 0;
+            padding: 28px 16px;
+            line-height: 1.6;
+        }
+
+        main {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(23, 32, 51, 0.08);
+        }
+
+        h1 {
+            color: #102b50;
+            font-size: 28px;
+            line-height: 1.3;
+            margin: 0 0 14px;
+        }
+
+        h2 {
+            color: #102b50;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        input,
+        select {
+            display: block;
+            width: 100%;
+            min-height: 46px;
+            padding: 12px;
+            margin: 0;
+            border: 1px solid #b8c3d1;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #172033;
+            font: inherit;
+        }
+
+        input:focus,
+        select:focus {
+            outline: 2px solid #174ea6;
+            outline-offset: 2px;
+            border-color: #174ea6;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            min-height: 48px;
+            padding: 12px 18px;
+            margin-top: 28px;
+            border: none;
+            border-radius: 8px;
+            background: #173b70;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #102b50;
+        }
+
+        .warning {
+            margin: 20px 0;
+            padding: 14px 16px;
+            background: #fff7ed;
+            border-left: 4px solid #c66a14;
+            border-radius: 6px;
+            color: #7c3f08;
+            font-size: 14px;
+        }
+
+        .result {
+            margin-top: 28px;
+            padding: 22px;
+            background: #f2f6fb;
+            border: 1px solid #dbe5f1;
+            border-radius: 10px;
+        }
+
+        .result li {
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+
+        hr {
+            margin: 28px 0 18px;
+            border: 0;
+            border-top: 1px solid #dbe3ee;
+        }
+
+        a {
+            color: #174f91;
+        }
+
+        .sources {
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 14px 10px;
+            }
+
+            main {
+                padding: 22px 18px;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Credit Card Eligibility Checker</h1>
+    <p>
+        Answer these questions to compare your details with selected
+        published card criteria.
+    </p>
+
+    <p class="warning">
+        This is educational guidance, not a credit bureau check,
+        bank approval or guarantee of eligibility. Enter approximate
+        figures only. Do not enter PAN, account numbers, passwords or OTPs.
+    </p>
+
+    <form method="POST">
+        <label for="bank">Bank or card</label>
+        <select id="bank" name="bank" required>
+            <option value="">Choose a card</option>
+            <option value="SBI">SBI Card — general guidance</option>
+            <option value="HDFC Millennia">HDFC Millennia</option>
+            <option value="Axis SELECT">Axis Bank SELECT</option>
+            <option value="ICICI">ICICI Bank — general guidance</option>
+        </select>
+
+        <label for="occupation">Employment type</label>
+        <select id="occupation" name="occupation" required>
+            <option value="">Choose employment type</option>
+            <option value="Salaried">Salaried</option>
+            <option value="Self-employed">Self-employed</option>
+            <option value="Student">Student</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="age">Age in years</label>
+        <input id="age" name="age" type="number"
+               min="18" max="100" required>
+
+        <label for="annual_income">Annual income in ₹</label>
+        <input id="annual_income" name="annual_income"
+               type="number" min="0" step="1000" required>
+
+        <label for="credit_history">Credit history (if known)</label>
+        <select id="credit_history" name="credit_history" required>
+            <option value="">Choose an answer</option>
+            <option value="Good">Good</option>
+            <option value="Limited">Limited or new to credit</option>
+            <option value="Poor">Poor</option>
+            <option value="Unknown">I don't know</option>
+        </select>
+
+        <label for="repayments">Previous loan/card repayment history</label>
+        <select id="repayments" name="repayments" required>
+            <option value="">Choose an answer</option>
+            <option value="On time">Usually paid on time</option>
+            <option value="Missed payments">Missed payments</option>
+            <option value="None">No previous loans or credit cards</option>
+            <option value="Unknown">I don't know</option>
+        </select>
+
+        <button type="submit">Check published criteria</button>
+    </form>
+
+    {% if result %}
+    <section class="result">
+        <h2>{{ result.status }}</h2>
+        <ul>
+            {% for item in result.details %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    <hr>
+    <p><a href="{{ url_for('home') }}">← Back to banking dashboard</a></p>
+
+    <p class="sources">
+        Official sources:
+        <a href="https://www.sbicard.com/en/personal/credit-cards.html"
+           target="_blank" rel="noopener">SBI Card</a> ·
+        <a href="https://www.hdfcbank.com/"
+           target="_blank" rel="noopener">HDFC Bank</a> ·
+        <a href="https://www.axisbank.com/retail/cards/credit-card/axis-bank-select-credit-card/features-benefits"
+           target="_blank" rel="noopener">Axis SELECT</a> ·
+        <a href="https://www.icicibank.com/personal-banking/faq/card/credit-card-faqs"
+           target="_blank" rel="noopener">ICICI Bank</a>
+    </p>
+</main>
+</body>
+</html>

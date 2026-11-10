@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI-Powered Banking Chatbot</title>
+
+
+
+    <style>
+
+        * {
+
+            box-sizing: border-box;
+
+        }
+
+
+
+        body {
+
+            margin: 0;
+
+            font-family: Arial, sans-serif;
+
+            background: #eef2f7;
+
+            color: #172033;
+
+        }
+
+
+
+        header {
+
+            background: #102b50;
+
+            color: white;
+
+            padding: 22px;
+
+            text-align: center;
+
+        }
+
+
+
+        header h1 {
+
+            margin: 0 0 8px;
+
+            font-size: 25px;
+
+        }
+
+
+
+        header p {
+
+            margin: 0;
+
+            color: #d5e4f7;
+
+        }
+
+
+
+        .dashboard-shell {
+            display: grid;
+            grid-template-columns: 250px minmax(0, 1fr);
+            gap: 24px;
+            max-width: 1440px;
+            margin: 24px auto;
+            padding: 0 24px;
+            align-items: start;
+        }
+
+        .sidebar {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 14px;
+            box-shadow: 0 8px 30px #17203310;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar-brand {
+            color: #173b70;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 0 10px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 14px;
+        }
+
+        .sidebar-welcome {
+            color: #64748b;
+            font-size: 13px;
+            padding: 0 10px 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .nav-links { display: grid; gap: 6px; }
+
+        .nav-links a {
+            display: block;
+            padding: 11px 12px;
+            border-radius: 9px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover, .nav-links a:focus {
+            background: #eef4ff;
+            color: #174ea6;
+        }
+
+        .nav-links a.logout {
+            margin-top: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+        }
+
+
+
+        .welcome {
+
+            font-weight: bold;
+
+            color: #173b70;
+
+        }
+
+
+
+        .logout {
+
+            display: inline-block;
+
+            padding: 9px 14px;
+
+            border-radius: 8px;
+
+            background: white;
+
+            border: 1px solid #ccd4e0;
+
+            color: #173b70;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+        }
+
+
+
+        .container {
+            min-width: 0;
+            max-width: 1000px;
+            margin: 0;
+            padding: 0;
+        }
+
+        @media (max-width: 850px) {
+            .dashboard-shell {
+                grid-template-columns: 1fr;
+                padding: 0 14px;
+                gap: 16px;
+                margin: 16px auto;
+            }
+            .sidebar { position: static; }
+            .nav-links {
+                grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+            }
+        }
+
+
+
+        .account-card {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            margin-bottom: 22px;
+
+            box-shadow: 0 8px 30px #17203310;
+
+        }
+
+
+
+        .account-card h2 {
+
+            margin: 0 0 6px;
+
+            color: #173b70;
+
+            font-size: 20px;
+
+        }
+
+
+
+        .account-subtitle {
+
+            color: #64748b;
+
+            margin: 0 0 20px;
+
+            font-size: 14px;
+
+        }
+
+
+
+        .account-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 14px;
+
+        }
+
+
+
+
+
+        .details-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 14px;
+
+            margin-top: 14px;
+
+        }
+
+
+
+@media (max-width: 520px) {
+
+    .details-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+
+
+
+        .detail {
+
+            background: #f5f8fc;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            min-width: 0;
+
+        }
+
+
+
+        .detail-label {
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 8px;
+
+        }
+
+
+
+        .detail-value {
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            overflow-wrap: anywhere;
+
+        }
+
+
+
+        .balance {
+
+            color: #147447;
+
+            font-size: 23px;
+
+        }
+
+
+
+        .status {
+
+            color: #147447;
+
+        }
+
+
+
+        .table-container {
+
+            width: 100%;
+
+            overflow-x: auto;
+
+        }
+
+
+
+        .transactions-section table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            text-align: left;
+
+        }
+
+
+
+        .transactions-section th,
+
+        .transactions-section td {
+
+            padding: 12px;
+
+            border-bottom: 1px solid #e5e7eb;
+
+        }
+
+
+
+        .transactions-section th {
+
+            background: #f3f4f6;
+
+        }
+
+
+
+
+
+        .chat-card {
+
+            background: white;
+
+            border-radius: 16px;
+
+            overflow: hidden;
+
+            box-shadow: 0 8px 30px #17203315;
+
+        }
+
+
+
+        .chat-heading {
+
+            padding: 18px;
+
+            border-bottom: 1px solid #e4e8ef;
+
+            font-weight: bold;
+
+        }
+
+
+
+        #messages {
+
+            height: 350px;
+
+            overflow-y: auto;
+
+            padding: 18px;
+
+        }
+
+
+
+        .message {
+
+            max-width: 85%;
+
+            padding: 12px 15px;
+
+            border-radius: 14px;
+
+            margin-bottom: 12px;
+
+            line-height: 1.5;
+
+            overflow-wrap: anywhere;
+
+        }
+
+
+
+        .bot {
+
+            background: #eef3f9;
+
+            margin-right: auto;
+
+        }
+
+
+
+        .loan-comparison {
+
+            max-width: 100%;
+
+            width: 100%;
+
+        }
+
+
+
+        .loan-comparison h3 {
+
+            color: #173b70;
+
+            margin-top: 0;
+
+        }
+
+
+
+        .loan-table-wrapper {
+
+            width: 100%;
+
+            overflow-x: auto;
+
+            margin: 12px 0;
+
+        }
+
+
+
+        .loan-table {
+
+            width: 100%;
+
+            min-width: 620px;
+
+            border-collapse: collapse;
+
+            background: white;
+
+            font-size: 13px;
+
+        }
+
+
+
+        .loan-table th,
+
+        .loan-table td {
+
+            padding: 10px;
+
+            border: 1px solid #dbe3ee;
+
+            text-align: right;
+
+            white-space: nowrap;
+
+        }
+
+
+
+        .loan-table th {
+
+            background: #173b70;
+
+            color: white;
+
+        }
+
+
+
+        .loan-table th:first-child,
+
+        .loan-table td:first-child {
+
+            text-align: left;
+
+        }
+
+
+
+        .loan-note {
+
+            font-size: 13px;
+
+            color: #475569;
+
+        }
+
+
+
+        .loan-sources a {
+
+            color: #174ea6;
+
+        }
+
+
+
+
+
+        .user {
+
+            background: #174ea6;
+
+            color: white;
+
+            margin-left: auto;
+
+        }
+
+
+
+        .quick-questions {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            padding: 0 18px 16px;
+
+        }
+
+
+
+        .quick-questions button {
+
+            background: white;
+
+            border: 1px solid #174ea6;
+
+            color: #174ea6;
+
+            border-radius: 20px;
+
+            padding: 9px 12px;
+
+            cursor: pointer;
+
+        }
+
+
+
+        .input-area {
+
+            display: flex;
+
+            gap: 10px;
+
+            padding: 16px;
+
+            border-top: 1px solid #e4e8ef;
+
+        }
+
+
+
+        #messageInput {
+
+            flex: 1;
+
+            min-width: 0;
+
+            padding: 13px;
+
+            border: 1px solid #ccd4e0;
+
+            border-radius: 10px;
+
+            font-size: 15px;
+
+        }
+
+
+
+        #sendButton {
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #174ea6;
+
+            color: white;
+
+            padding: 0 20px;
+
+            cursor: pointer;
+
+        }
+
+
+
+        #sendButton:disabled {
+
+            opacity: 0.6;
+
+            cursor: wait;
+
+        }
+
+
+
+        .notice {
+
+            text-align: center;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+            line-height: 1.6;
+
+            padding: 0 20px 18px;
+
+        }
+
+
+
+        @media (max-width: 520px) {
+
+            .account-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+
+            #messages {
+
+                height: 320px;
+
+            }
+
+
+
+            #sendButton {
+
+                padding: 0 14px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+
+<body>
+
+    <header>
+
+        <h1>AI-Powered Banking Chatbot</h1>
+
+        <p>Your assistant for banking information and support</p>
+
+    </header>
+
+
+
+
+
+<div class="dashboard-shell">
+    <aside class="sidebar" aria-label="Dashboard navigation">
+        <div class="sidebar-brand">Banking Dashboard</div>
+        <div class="sidebar-welcome">Welcome, {{ customer["full_name"] }}!</div>
+        <nav class="nav-links">
+            <a href="{{ url_for('profile') }}">My Profile</a>
+            <a href="{{ url_for('account_statement') }}">Account Statement</a>
+            <a href="{{ url_for('credit_eligibility') }}">Credit Card Eligibility</a>
+            <a href="#complaints">My Complaints</a>
+            {% if session.get("role") == "admin" %}
+                <a href="{{ url_for('admin_customers') }}">Admin Dashboard</a>
+            {% endif %}
+            <a class="logout" href="{{ url_for('logout') }}">Log Out</a>
+        </nav>
+    </aside>
+
+    <main class="container">
+
+
+
+        <section class="account-card">
+
+            <h2>Your Banking Overview</h2>
+
+            <p class="account-subtitle">
+
+                Your account information and current status
+
+            </p>
+
+
+
+            <div class="account-grid">
+
+                <div class="detail">
+
+                    <div class="detail-label">Account Holder</div>
+
+                    <div class="detail-value">
+
+                        {{ customer["full_name"] }}
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="detail">
+
+                    <div class="detail-label">Email Address</div>
+
+                    <div class="detail-value">
+
+                        {{ customer["email"] }}
+
+                    </div>
+
+                </div>
+
+
+
+                {% if accounts %}
+
+    <div class="detail">
+
+        <div class="detail-label">Select Account for Chatbot</div>
+
+        <select id="accountSelect" onchange="changeSelectedAccount()">
+
+            {% for acc in accounts %}
+
+                <option value="{{ acc['id'] }}"
+
+                    {% if loop.first %}selected{% endif %}>
+
+                    {{ acc["account_type"] }} — ••••{{ acc["account_number"][-4:] }}
+
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+
+    {% for acc in accounts %}
+
+        <div class="detail account-info"
+
+             data-account-id="{{ acc['id'] }}"
+
+             {% if not loop.first %}style="display:none;"{% endif %}>
+
+            <div class="detail-label">Account Identifier</div>
+
+            <div class="detail-value">
+
+                ••••{{ acc["account_number"][-4:] }}
+
+            </div>
+
+
+
+            <div class="detail-label">Account Type</div>
+
+            <div class="detail-value">
+
+                {{ acc["account_type"] }}
+
+            </div>
+
+
+
+            <div class="detail-label">Available Balance</div>
+
+            <div class="detail-value balance">
+
+                ₹{{ "{:,.2f}".format(acc["balance"]) }}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+            <p>No accounts found. Add an account below.</p>
+
+    {% endif %}
+
+    </div>
+
+
+
+{% if cards %}
+
+    <div class="details-grid">
+
+        {% for c in cards %}
+
+            <div class="detail">
+
+                <div class="detail-label">Card</div>
+
+                <div class="detail-value">
+
+                    {{ c["card_type"] }} ••••{{ c["card_number"][-4:] }}
+
+                </div>
+
+
+
+                <div class="detail-label">Linked Account</div>
+
+                <div class="detail-value">
+
+                    {{ c["account_type"] }} — ••••{{ c["account_number"][-4:] }}
+
+                </div>
+
+
+
+                <div class="detail-label">Card Status</div>
+
+                <div class="detail-value">
+
+                    {{ c["status"] }}
+
+                </div>
+
+
+
+                <div class="detail-label">Card Expiry</div>
+
+                <div class="detail-value">
+
+                    {{ "%02d"|format(c["expiry_month"]) }}/{{ c["expiry_year"] }}
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <p>No cards found. Add a card below.</p>
+
+{% endif %}
+
+
+
+
+
+        <div class="account-card">
+
+    <h3>Add Another Account</h3>
+
+    <p>Use fictional account details for this project.</p>
+
+
+
+    <form action="{{ url_for('add_account') }}" method="POST">
+
+        <label for="new_account_number">Account Identifier</label>
+
+        <input
+
+            id="new_account_number"
+
+            name="account_number"
+
+            type="text"
+
+            inputmode="numeric"
+
+            pattern="[0-9]{8,16}"
+
+            minlength="8"
+
+            maxlength="16"
+
+            placeholder="Enter 8–16 fictional digits"
+
+            required
+
+        \>
+
+
+
+        <label for="new_account_type">Account Type</label>
+
+        <select id="new_account_type" name="account_type" required>
+
+            <option value="Savings">Savings</option>
+
+            <option value="Current">Current</option>
+
+        </select>
+
+
+
+        <button type="submit">Add Account</button>
+
+    </form>
+
+</div>
+
+
+
+<div class="account-card">
+
+    <h3>Add Another Card</h3>
+
+    <p>Use fictional card details only. Never enter a real card number, PIN, CVV, or OTP.</p>
+
+
+
+    {% if accounts %}
+
+    <form action="{{ url_for('add_card') }}" method="POST">
+
+        <label for="new_card_account">Link to Account</label>
+
+        <select id="new_card_account" name="account_id" required>
+
+            {% for acc in accounts %}
+
+            <option value="{{ acc['id'] }}">
+
+                {{ acc["account_type"] }} — ••••{{ acc["account_number"][-4:] }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+
+        <label for="new_card_number">Fictional Card Identifier</label>
+
+        <input
+
+            id="new_card_number"
+
+            name="card_number"
+
+            type="text"
+
+            inputmode="numeric"
+
+            pattern="[0-9]{4}"
+
+            minlength="4"
+
+            maxlength="4"
+
+            placeholder="4 fictional digits"
+
+            required
+
+        \>
+
+
+
+        <label for="new_card_type">Card Type</label>
+
+        <select id="new_card_type" name="card_type" required>
+
+            <option value="Debit">Debit</option>
+
+            <option value="Credit">Credit</option>
+
+        </select>
+
+
+
+        <label for="new_card_expiry_month">Expiry Month</label>
+
+        <select id="new_card_expiry_month" name="expiry_month" required>
+
+            {% for month in range(1, 13) %}
+
+            <option value="{{ month }}">{{ "%02d"|format(month) }}</option>
+
+            {% endfor %}
+
+        </select>
+
+
+
+        <label for="new_card_expiry_year">Expiry Year</label>
+
+        <input
+
+            id="new_card_expiry_year"
+
+            name="expiry_year"
+
+            type="number"
+
+            min="2026"
+
+            max="2041"
+
+            value="2030"
+
+            required
+
+        \>
+
+
+
+        <button type="submit">Add Card</button>
+
+    </form>
+
+    {% else %}
+
+    <p>Add an account before adding a card.</p>
+
+    {% endif %}
+
+</div>
+
+
+
+        <section class="account-card transactions-section">
+
+            <h2>Recent Transactions</h2>
+
+            <p class="account-subtitle">Your 10 most recent transactions</p>
+
+
+
+            {% if transactions %}
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Type</th>
+
+                            <th>Amount</th>
+
+                            <th>Description</th>
+
+                            <th>Status</th>
+
+                            <th>Date & Time</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for txn in transactions %}
+
+                        <tr>
+
+                            <td>{{ txn["transaction_type"] }}</td>
+
+                            <td>₹{{ "{:,.2f}".format(txn["amount"]) }}</td>
+
+                            <td>{{ txn["description"] }}</td>
+
+                            <td>{{ txn["status"] }}</td>
+
+                            <td>{{ txn["created_at"] }}</td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <p>No transactions yet. Your completed simulated transactions will appear here.</p>
+
+            {% endif %}
+
+        </section>
+
+
+
+
+
+
+
+        <section class="account-card transactions-section" id="complaints">
+            <h2>My Complaints</h2>
+            <p class="account-subtitle">Your 10 most recent complaints and their current status</p>
+            {% if complaints %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Category</th>
+                            <th>Complaint Details</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td><strong>CMP-{{ "%06d"|format(complaint["id"]) }}</strong></td>
+                            <td>{{ complaint["category"] }}</td>
+                            <td>{{ complaint["query"] }}</td>
+                            <td>{{ complaint["status"] }}</td>
+                            <td>{{ complaint["created_at"] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>You have no registered complaints yet. Ask the chatbot to register a complaint.</p>
+            {% endif %}
+            <p class="account-subtitle">For help registering a complaint, use the Banking Support Chat below.</p>
+        </section>
+
+        <section class="chat-card">
+
+            <div class="chat-heading">
+
+                Banking Support Chat
+
+            </div>
+
+
+
+            <div id="messages" aria-live="polite">
+
+                <div class="message bot">
+
+                    Hello, {{ customer["full_name"] }}!
+
+                    Welcome to your banking assistant.
+
+                    You can ask me general banking questions.
+
+                </div>
+
+            </div>
+
+
+
+            <div class="quick-questions">
+
+                <button type="button"
+
+                        data-question="My UPI payment failed">
+
+                    UPI Payment
+
+                </button>
+
+
+
+                <button type="button"
+
+                        data-question="I lost my ATM card">
+
+                    ATM / Card
+
+                </button>
+
+
+
+                <button type="button"
+
+                        data-question="How do I check my account balance?">
+
+                    Account
+
+                </button>
+
+
+
+                <button type="button"
+
+                        data-question="I suspect a fraud">
+
+                    Report Fraud
+
+                </button>
+
+            </div>
+
+
+
+            <form class="input-area" id="chatForm">
+
+                <input
+
+                    id="messageInput"
+
+                    type="text"
+
+                    placeholder="Type your banking question..."
+
+                    autocomplete="off"
+
+                    required
+
+                \>
+
+                <button id="sendButton" type="submit">Send</button>
+
+            </form>
+
+
+
+            <div class="notice">
+
+                This application uses simulated banking data and is not
+
+                connected to a real bank. Never enter your PIN, OTP, CVV,
+
+                or password in the chat. For urgent banking issues,
+
+                contact your bank directly.
+
+            </div>
+
+        </section>
+
+    </main>
+</div>
+
+    <script>
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("messageInput");
+    const messages = document.getElementById("messages");
+    const sendButton = document.getElementById("sendButton");
+
+    function addMessage(text, sender) {
+        const bubble = document.createElement("div");
+        bubble.className = "message " + sender;
+
+        // Render loan comparison tables safely.
+        if (sender === "bot" && text.includes("|")) {
+            const lines = text.split("\n");
+            const tableLines = lines.filter(line =>
+                line.trim().startsWith("|")
+            );
+
+            if (tableLines.length >= 3) {
+                bubble.classList.add("loan-comparison");
+                let insideTable = false;
+                let table = null;
+
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+
+                    if (trimmed.startsWith("|")) {
+                        if (!insideTable) {
+                            insideTable = true;
+
+                            const wrapper = document.createElement("div");
+                            wrapper.className = "loan-table-wrapper";
+
+                            table = document.createElement("table");
+                            table.className = "loan-table";
+
+                            wrapper.appendChild(table);
+                            bubble.appendChild(wrapper);
+                        }
+
+                        // Skip Markdown table separator rows.
+                        if (/^\|?[\s:-]+(?:\|[\s:-]+)+\|?$/.test(trimmed)) {
+                            return;
+                        }
+
+                        const cells = trimmed
+                            .replace(/^\|/, "")
+                            .replace(/\|$/, "")
+                            .split("|")
+                            .map(cell => cell.trim());
+
+                        const row = document.createElement("tr");
+
+                        cells.forEach(cellText => {
+                            const cell = document.createElement(
+                                table.rows.length === 0 ? "th" : "td"
+                            );
+
+                            const linkMatch = cellText.match(
+                                /^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/
+                            );
+
+                            if (linkMatch) {
+                                const link = document.createElement("a");
+                                link.textContent = linkMatch[1];
+                                link.href = linkMatch[2];
+                                link.target = "_blank";
+                                link.rel = "noopener noreferrer";
+                                cell.appendChild(link);
+                            } else {
+                                cell.textContent = cellText.replace(/\*\*/g, "");
+                            }
+
+                            row.appendChild(cell);
+                        });
+
+                        table.appendChild(row);
+                    } else {
+                        insideTable = false;
+
+                        if (trimmed) {
+                            if (trimmed.startsWith("### ")) {
+                                const heading = document.createElement("h3");
+                                heading.textContent = trimmed.replace(/^###\s*/, "");
+                                bubble.appendChild(heading);
+                            } else {
+                                const paragraph = document.createElement("p");
+                                paragraph.className = "loan-note";
+                                paragraph.textContent = trimmed.replace(/\*\*/g, "");
+                                bubble.appendChild(paragraph);
+                            }
+                        }
+                    }
+                });
+            } else {
+                bubble.textContent = text;
+            }
+        } else {
+            bubble.textContent = text;
+        }
+
+        messages.appendChild(bubble);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage(text) {
+        const message = text.trim();
+
+        if (!message || sendButton.disabled) {
+            return;
+        }
+
+        addMessage(message, "user");
+        input.value = "";
+        sendButton.disabled = true;
+
+        try {
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: message,
+                    account_id:
+                        document.getElementById("accountSelect")?.value || null
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.reply || "Request failed.");
+            }
+
+            addMessage(data.reply, "bot");
+        } catch (error) {
+            console.error("Chat request failed:", error);
+            addMessage(
+                "Sorry, I couldn't connect. Please check that the server is running and try again.",
+                "bot"
+            );
+        } finally {
+            sendButton.disabled = false;
+            input.focus();
+        }
+    }
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        sendMessage(input.value);
+    });
+
+    document.querySelectorAll("[data-question]").forEach(function(button) {
+        button.addEventListener("click", function() {
+            sendMessage(button.dataset.question);
+        });
+    });
+
+    function changeSelectedAccount() {
+        const selector = document.getElementById("accountSelect");
+        if (!selector) return;
+
+        const selectedId = selector.value;
+
+        document.querySelectorAll(".account-info").forEach(function(item) {
+            item.style.display =
+                item.dataset.accountId === selectedId ? "" : "none";
+        });
+    }
+</script>
+
+</body>
+
+</html>

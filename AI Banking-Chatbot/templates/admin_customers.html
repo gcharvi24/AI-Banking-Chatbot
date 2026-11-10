@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Customer Management</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 24px;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        h1 { color: #17365d; }
+
+        .top-links {
+            margin-bottom: 18px;
+        }
+
+        .top-links a {
+            margin-right: 18px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1250px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+        }
+
+        form {
+            display: inline-block;
+            margin: 3px;
+        }
+
+        button {
+            padding: 7px 10px;
+            border: 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .enable, .unlock {
+            background: #d9f2df;
+        }
+
+        .disable, .lock {
+            background: #ffe0e0;
+        }
+
+        .admin {
+            background: #dce8ff;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .protected {
+            color: #555;
+            font-style: italic;
+        }
+
+        .no-card {
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Admin Customer Management</h1>
+
+    <div class="top-links">
+        <a href="/">← Back to Banking Dashboard</a>
+        <a href="{{ url_for('admin_complaints') }}">Manage Complaints →</a>
+        <a href="{{ url_for('admin_activity') }}">View Admin Activity Log →</a>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>App Access</th>
+                    <th>Card</th>
+                    <th>Card Status</th>
+                    <th>Customer/Admin Actions</th>
+                    <th>Card Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ customer["id"] }}</td>
+                    <td>{{ customer["full_name"] }}</td>
+                    <td>{{ customer["email"] }}</td>
+                    <td>{{ customer["phone_number"] or "Not provided" }}</td>
+
+                    <td>
+                        {% if customer["is_primary_admin"] %}
+                            Primary Admin
+                        {% else %}
+                            {{ customer["role"]|title }}
+                        {% endif %}
+                    </td>
+
+                    <td class="status">
+                        {{ "Enabled" if customer["is_active"] else "Disabled" }}
+                    </td>
+
+                    <td>
+                        {% if customer["card_id"] %}
+                            {{ customer["card_type"] or "Bank Card" }}
+                            <br>
+                            <small>
+                                Ending in
+                                {{ customer["card_number"][-4:] if customer["card_number"] else "****" }}
+                            </small>
+                        {% else %}
+                            <span class="no-card">No card registered</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="status">
+                        {% if customer["card_id"] %}
+                            {{ customer["card_status"] or "Unknown" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if customer["is_primary_admin"] %}
+                            <span class="protected">Protected account</span>
+                        {% else %}
+                            {% if customer["is_active"] %}
+                                <form method="POST"
+                                      action="{{ url_for('update_customer_access', customer_id=customer['id']) }}"
+                                      onsubmit="return confirm('Disable this customer account?');">
+                                    <input type="hidden" name="action" value="disable">
+                                    <button class="disable" type="submit">Disable</button>
+                                </form>
+                            {% else %}
+                                <form method="POST"
+                                      action="{{ url_for('update_customer_access', customer_id=customer['id']) }}"
+                                      onsubmit="return confirm('Enable this customer account?');">
+                                    <input type="hidden" name="action" value="enable">
+                                    <button class="enable" type="submit">Enable</button>
+                                </form>
+                            {% endif %}
+
+                            {% if customer["role"] == "admin" %}
+                                <form method="POST"
+                                      action="{{ url_for('update_customer_access', customer_id=customer['id']) }}"
+                                      onsubmit="return confirm('Revoke administrator permission?');">
+                                    <input type="hidden" name="action" value="revoke_admin">
+                                    <button class="admin" type="submit">Revoke Admin</button>
+                                </form>
+                            {% else %}
+                                <form method="POST"
+                                      action="{{ url_for('update_customer_access', customer_id=customer['id']) }}"
+                                      onsubmit="return confirm('Grant administrator permission?');">
+                                    <input type="hidden" name="action" value="grant_admin">
+                                    <button class="admin" type="submit">Grant Admin</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if customer["card_id"] %}
+                            {% if customer["card_status"] == "Blocked" %}
+                                <form method="POST"
+                                      action="{{ url_for('update_customer_card', customer_id=customer['id']) }}"
+                                      onsubmit="return confirm('Unlock this simulated card?');">
+                                    <input type="hidden" name="action" value="unlock_card">
+                                    <button class="unlock" type="submit">Unlock Card</button>
+                                </form>
+                            {% elif customer["card_status"] == "Active" %}
+                                <form method="POST"
+                                      action="{{ url_for('update_customer_card', customer_id=customer['id']) }}"
+                                      onsubmit="return confirm('Lock this simulated card?');">
+                                    <input type="hidden" name="action" value="lock_card">
+                                    <button class="lock" type="submit">Lock Card</button>
+                                </form>
+                            {% else %}
+                                <span class="no-card">Cannot change status</span>
+                            {% endif %}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="10">No customers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        <small>
+            Card locking and account-management actions affect only this
+            project's simulated banking database, not real bank accounts or cards.
+        </small>
+    </p>
+</body>
+</html>

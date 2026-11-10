@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Banking Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 440px;
+            margin: 20px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px #00000012;
+        }
+
+        h1 { color: #173b70; font-size: 24px; }
+        label { display: block; margin-top: 14px; font-weight: bold; }
+        input, select, button {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px;
+            margin-top: 6px;
+            border: 1px solid #ccd3df;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            margin-top: 22px;
+            background: #173b70;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .message { color: #b42318; margin-top: 12px; }
+        .note { color: #555; font-size: 13px; line-height: 1.5; }
+        a { color: #173b70; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Your Account</h1>
+        <p>Enter your details to create your banking profile.</p>
+
+        <form method="POST" action="/register">
+            <label for="full_name">Full Name</label>
+            <input id="full_name" name="full_name"
+                   autocomplete="name" required>
+
+            <label for="email">Email Address</label>
+            <input id="email" name="email" type="email"
+                   autocomplete="email" required>
+
+            <label for="password">Create Password</label>
+            <input id="password" name="password" type="password"
+                   autocomplete="new-password" minlength="8" required>
+
+            <label for="account_number">Choose an Account Identifier</label>
+            <input id="account_number" name="account_number"
+                   inputmode="numeric" minlength="8" maxlength="16"
+                   pattern="[0-9]{8,16}" required>
+            <p class="note">Use a fictional identifier for this student project, not a real bank account number.</p>
+
+            <label for="account_type">Account Type</label>
+            <select id="account_type" name="account_type" required>
+                <option value="Savings">Savings</option>
+                <option value="Current">Current</option>
+            </select>
+
+            <label for="card_identifier">Choose a 4-Digit Card Identifier</label>
+            <input id="card_identifier" name="card_identifier"
+                   inputmode="numeric" minlength="4" maxlength="4"
+                   pattern="[0-9]{4}" required>
+            <p class="note">This is only a fictional identifier, not a real card number, PIN, or CVV.</p>
+
+            <label for="card_type">Card Type</label>
+            <select id="card_type" name="card_type" required>
+                <option value="Debit">Debit Card</option>
+                <option value="Credit">Credit Card</option>
+            </select>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        {% if error %}
+            <p class="message">{{ error }}</p>
+        {% endif %}
+
+        <p>Already registered? <a href="/login">Log in</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Activity Log</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 24px;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        h1 {
+            color: #17365d;
+        }
+
+        .top-links {
+            margin-bottom: 18px;
+        }
+
+        .top-links a {
+            margin-right: 18px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+        }
+
+        .empty {
+            text-align: center;
+            color: #666;
+        }
+
+        .note {
+            margin-top: 16px;
+            color: #555;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Admin Activity Log</h1>
+
+    <div class="top-links">
+        <a href="{{ url_for('admin_customers') }}">← Back to Customer Management</a>
+        <a href="/">Banking Dashboard</a>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Administrator</th>
+                    <th>Action</th>
+                    <th>Target Customer ID</th>
+                    <th>Details</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for activity in activities %}
+                <tr>
+                    <td>{{ activity["id"] }}</td>
+                    <td>{{ activity["admin_email"] }}</td>
+                    <td>{{ activity["action"]|replace("_", " ")|title }}</td>
+                    <td>
+                        {{ activity["target_customer_id"] if activity["target_customer_id"] else "—" }}
+                    </td>
+                    <td>{{ activity["details"] }}</td>
+                    <td>{{ activity["created_at"] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty">
+                        No administrator activity has been recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="note">
+        This log records supported administrator actions performed through
+        the project's admin dashboard. It displays up to the latest 200 entries.
+    </p>
+</body>
+</html>

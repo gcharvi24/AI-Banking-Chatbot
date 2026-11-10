@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simulated Account Statement</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eef2f7;
+               color: #172033; margin: 0; padding: 20px; }
+        main { max-width: 950px; margin: auto; background: white;
+               padding: 24px; border-radius: 14px; }
+        .warning { background: #fff3cd; padding: 14px;
+                   border-radius: 8px; font-weight: bold; }
+        form { display: flex; gap: 12px; flex-wrap: wrap;
+               align-items: end; margin: 20px 0; }
+        label { display: block; margin-bottom: 6px; }
+        input, select, button, .button {
+            padding: 10px; border-radius: 6px;
+            border: 1px solid #ccd4e0; font-size: 14px;
+        }
+        button, .button { background: #174ea6; color: white;
+                          cursor: pointer; text-decoration: none; }
+        .summary { display: flex; gap: 12px; flex-wrap: wrap; }
+        .box { background: #f5f8fc; padding: 15px;
+               border-radius: 8px; flex: 1; min-width: 150px; }
+        .table-wrap { overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd;
+                 text-align: left; white-space: nowrap; }
+        th { background: #173b70; color: white; }
+        @media print {
+            form, .button, .back { display: none; }
+            body { background: white; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Account Statement</h1>
+
+    <div class="warning">
+        SIMULATED PROJECT STATEMENT — NOT AN OFFICIAL BANK STATEMENT
+    </div>
+
+    <form method="GET" action="{{ url_for('account_statement') }}">
+        <div>
+            <label for="account_id">Account</label>
+            <select name="account_id" id="account_id">
+                {% for acc in accounts %}
+                <option value="{{ acc['id'] }}"
+                    {% if acc['id'] == selected['id'] %}selected{% endif %}>
+                    {{ acc['account_type'] }} — ••••{{ acc['account_number'][-4:] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="start_date">From</label>
+            <input type="date" id="start_date" name="start_date"
+                   value="{{ start_date }}" required>
+        </div>
+
+        <div>
+            <label for="end_date">To</label>
+            <input type="date" id="end_date" name="end_date"
+                   value="{{ end_date }}" required>
+        </div>
+
+        <button type="submit">View Statement</button>
+    </form>
+
+    <p>
+        Account type: <strong>{{ selected['account_type'] }}</strong><br>
+        Account ending: <strong>••••{{ selected['account_number'][-4:] }}</strong><br>
+        Period: <strong>{{ start_date }} to {{ end_date }}</strong>
+    </p>
+
+    <div class="summary">
+        <div class="box">Opening Balance<br>
+            <strong>₹{{ "{:,.2f}".format(opening_balance) }}</strong>
+        </div>
+        <div class="box">Closing Balance<br>
+            <strong>₹{{ "{:,.2f}".format(closing_balance) }}</strong>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Reference</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn['created_at'] }}</td>
+                    <td>{{ txn['transaction_type'] }}</td>
+                    <td>{{ txn['description'] }}</td>
+                    <td>{{ txn['reference_number'] or '-' }}</td>
+                    <td>
+                        {% if txn['transaction_type'] == 'Deposit' %}+{% else %}-{% endif %}
+                        ₹{{ "{:,.2f}".format(txn['amount']) }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No completed transactions in this period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        <a class="button"
+           href="{{ url_for('account_statement',
+             account_id=selected['id'],
+             start_date=start_date,
+             end_date=end_date,
+             download='csv') }}">Download CSV</a>
+        <button type="button" onclick="window.print()">Print / Save as PDF</button>
+        <a class="back" href="{{ url_for('home') }}">Back to Dashboard</a>
+    </p>
+
+    <p><small>This statement uses simulated project data and is not a bank-issued document.</small></p>
+</main>
+</body>
+</html>
